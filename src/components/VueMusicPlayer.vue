@@ -300,6 +300,7 @@ export default {
 		}, //player & track list
 		handleEnded: function() {
 			this.changeSong(this.nextIndex());
+			this.playerTracklistStore.waves_active = this.playerTracklistStore.currentSong
 		}, //player & track list
 		getCurrentTimeEverySecond: function() {
 			var that = this;
@@ -333,7 +334,7 @@ export default {
 
 		this.changeSong(this.playerTracklistStore.currentSong, false);
 		this.audio.loop = false;
-		console.log(this.audio)
+
 	},
 
 	watch: {
