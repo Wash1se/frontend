@@ -1,25 +1,25 @@
 <template>
 	<div class="audioPlayerList">
 			<div style="padding:0px 20px;margin:10px 0 10px 0;">
-				<table class="item" v-for="(item,index) in musicPlaylist" :class="{ 'isActive':isCurrentSong(index) }"
+				<table class="item" v-for="(item,index) in musicPlaylist"
 				:key="item.id"
 				@mouseover="highlighted = item.id"
 				@mouseleave="highlighted = null"
-				@click="clickTrackTemplate(index)">
+				@click="this.emitter.emit('clickTrackTemplate', index)">
 					<td class="id-waves-or-btn" style="justify-content: center!important;">
 						<transition v-if="highlighted === item.id"
 						name="fade" mode="out-in" style="display: flex;justify-content: center;width: 100%;" appear>
 
-							<a class="button play" @click="playPauseAudio(index)" title="Play/Pause Song" :key="currentSong + currentlyPlaying">
-								<v-icon :name="currentlyPlaying && currentSong === index ? 'hi-solid-pause' : 'bi-play-circle-fill' " 
+							<a class="button play" @click="this.emitter.emit('playPauseAudio', index)" title="Play/Pause Song" :key="playerTracklistStore.currentSong + playerTracklistStore.currentlyPlaying">
+								<v-icon :name="playerTracklistStore.currentlyPlaying && playerTracklistStore.currentSong === index ? 'hi-solid-pause' : 'bi-play-circle-fill' " 
 								:key="1" class="icon" scale="2" fill="red"/>
 							</a>
 						</transition>
 
-						<div v-if="highlighted != item.id && waves_active!=index" 
+						<div v-if="highlighted != item.id && playerTracklistStore.waves_active!=index" 
 						style="display: flex;justify-content: center;width: 100%;" class="index">{{index+1}}</div>
 					
-						<div v-if="waves_active===index && highlighted != item.id" class="wave active">
+						<div v-if="playerTracklistStore.waves_active===index && highlighted != item.id" class="wave active">
 							<div class="wave1"></div>
 							<div class="wave1"></div>
 							<div class="wave1"></div>
@@ -47,8 +47,76 @@
 		</div>
 </template>
 
+
+<script>
+import { useTokenStore } from "@/stores/store.js";
+import {usePlayerTracklistStore} from "@/stores/usePlayerTracklistStore.js";
+// import Vue from 'vue'
+
+
+export default {
+
+	name: "trackList",
+
+    setup(){
+      const store = useTokenStore();
+      const playerTracklistStore = usePlayerTracklistStore();
+
+      return{
+        store,
+        playerTracklistStore,
+
+        // waves_active: playerTracklistStore.waves_active, //track list & player 1
+        // currentSong: playerTracklistStore.currentSong, //track list & player 1
+        // currentlyPlaying: playerTracklistStore.currentlyPlaying, //track list & player 1
+
+        
+      }
+    },
+
+	data() {
+		return {
+				highlighted:null, //track list
+
+				musicPlaylist:this.playerTracklistStore.musicPlaylist, //track list & player
+
+				// waves_active: Vue.prototype.$waves_active, //track list & player
+				// audio: Vue.prototype.$audio, //track list & player
+				// posterLoad: Vue.prototype.$posterLoad, //track list & player
+				// currentlyPlaying: Vue.prototype.$currentlyPlaying, //track list & player
+				// currentSong: Vue.prototype.$currentSong, //track list & player
+				// trackDuration: Vue.prototype.$trackDuration, //track list & player
+				// checkingCurrentPositionInTrack: Vue.prototype.$checkingCurrentPositionInTrack, //track list & player
+
+
+		};
+	},
+	methods: {
+		isCurrentSong: function(index) {
+			if (this.playerTracklistStore.currentSong == index) {
+				return true;
+			}
+			return false;
+		}, //track list
+
+	},
+
+	mounted(){
+	},
+
+};
+</script>
+
+
+
+
+
+
+
+
+
 <style>
-		.audioPlayerList .item .id-waves-or-btn .wave{
+.audioPlayerList .item .id-waves-or-btn .wave{
     width: 30px;
     height: 30px;
     /* border: 1px solid #fff; */
@@ -142,37 +210,6 @@
 
 
 </style>
-
-<script>
-import { useTokenStore } from "@/stores/store.js";
-import {usePlayerTracklistStore} from "@/stores/usePlayerTracklistStore.js";
-
-
-export default {
-
-	name: "MusicPlayer",
-
-    setup(){
-      const store = useTokenStore();
-      const playerTracklistStore = usePlayerTracklistStore();
-
-      return{
-        store,
-        playerTracklistStore,
-
-
-      }
-    },
-
-	data() {
-		return {
-				highlighted:null, //track list
-		};
-	},
-	methods: {
-	},
-};
-</script>
 
 
 <style lang="stylus" scoped>

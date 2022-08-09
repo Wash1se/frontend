@@ -80,6 +80,7 @@ export const useTokenStore = defineStore('token', {
             this.authenticated = false
             this.refresh_expired = true
             window.location.href = '/';
+            document.location.reload();
           })
           .catch((error) => {
             // console.clear()

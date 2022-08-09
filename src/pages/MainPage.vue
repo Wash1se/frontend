@@ -25,8 +25,10 @@
               </td>
           </table>
     </div>
-
+  
     <MusicPlayer/>
+    <VueTracklist/>
+
     <h1>{{playerTracklistStore.musicPlaylist}}</h1>
 
     
@@ -40,11 +42,14 @@ import { usePlayerTracklistStore } from '@/stores/usePlayerTracklistStore.js';
 
 import Message from '@/components/VueMessage.vue';
 import API from '@/utils/api.js';
+import VueTracklist from '@/components/VueTracklist.vue';
 import MusicPlayer from '@/components/VueMusicPlayer.vue'
+
 
 export default {
   components:{
       Message,
+      VueTracklist,
       MusicPlayer
     },
 

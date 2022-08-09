@@ -1,64 +1,17 @@
 <template>
-		<div class="audioPlayerList">
-			<div style="padding:0px 20px;margin:10px 0 10px 0;">
-				<table class="item" v-for="(item,index) in musicPlaylist" :class="{ 'isActive':isCurrentSong(index) }"
-				:key="item.id"
-				@mouseover="highlighted = item.id"
-				@mouseleave="highlighted = null"
-				@click="clickTrackTemplate(index)">
-					<td class="id-waves-or-btn" style="justify-content: center!important;">
-						<transition v-if="highlighted === item.id"
-						name="fade" mode="out-in" style="display: flex;justify-content: center;width: 100%;" appear>
-
-							<a class="button play" @click="playPauseAudio(index)" title="Play/Pause Song" :key="currentSong + currentlyPlaying">
-								<v-icon :name="currentlyPlaying && currentSong === index ? 'hi-solid-pause' : 'bi-play-circle-fill' " 
-								:key="1" class="icon" scale="2" fill="red"/>
-							</a>
-						</transition>
-
-						<div v-if="highlighted != item.id && waves_active!=index" 
-						style="display: flex;justify-content: center;width: 100%;" class="index">{{index+1}}</div>
-					
-						<div v-if="waves_active===index && highlighted != item.id" class="wave active">
-							<div class="wave1"></div>
-							<div class="wave1"></div>
-							<div class="wave1"></div>
-						</div>
-					</td>
-
-
-					<td class="song-info">
-						<img class="song-img" :src="store.mediaUrl+item.icon_path" alt="">
-						<h5>
-							{{item.song_name}}
-							<br> 
-							<div class="subtitle">{{item.song_author}}</div> 
-						</h5>
-					</td>
-
-					<td class="album">Пока пусто</td>
-
-					<td class="is-liked"><i class="bi fas bi-heart-fill"></i></td>
-
-
-					<td class="duration">{{item.duration}}</td>
-				</table>
-			</div>
-		</div>
-
 
 		<div class="audioPlayerUI">
 
 			<div class="albumDetails">
 				<transition name="slide-fade" mode="out-in" appear>
-					<img class="image" :key="currentSong" :src="store.mediaUrl+musicPlaylist[currentSong].icon_path" alt="">
+					<img class="image" :key="playerTracklistStore.currentSong" :src="store.mediaUrl+playerTracklistStore.musicPlaylist[playerTracklistStore.currentSong].icon_path" alt="">
 				</transition>
 				<div style="width: 70%; display: flex;	flex-wrap: wrap;flex-direction: column;justify-content: center;">
 					<transition name="slide-fade" mode="out-in" appear>
-						<p class="title" :key="currentSong">{{ musicPlaylist[currentSong].song_name }}</p>
+						<p class="title" :key="playerTracklistStore.currentSong">{{ playerTracklistStore.musicPlaylist[playerTracklistStore.currentSong].song_name }}</p>
 					</transition>
 					<transition name="slide-fade" mode="out-in" appear>
-						<p class="artist" :key="currentSong">{{ musicPlaylist[currentSong].song_author }}</p>
+						<p class="artist" :key="playerTracklistStore.currentSong">{{ playerTracklistStore.musicPlaylist[playerTracklistStore.currentSong].song_author }}</p>
 					</transition>
 				</div>
 			</div>
@@ -76,8 +29,8 @@
 
 					<!-- play/ pause btn -->
 					<transition name="fade" mode="out-in" appear>
-						<a class="button play" @click="playPauseAudio(currentSong)" title="Play/Pause Song" :key="currentSong + currentlyPlaying">
-							<v-icon :name="currentlyPlaying ? 'hi-solid-pause' : 'bi-play-circle-fill' " 
+						<a class="button play" @click="playPauseAudio(playerTracklistStore.currentSong)" title="Play/Pause Song" :key="playerTracklistStore.currentSong + playerTracklistStore.currentlyPlaying">
+							<v-icon :name="playerTracklistStore.currentlyPlaying ? 'hi-solid-pause' : 'bi-play-circle-fill' " 
 							:key="1" class="icon" scale="2" fill="red"/>
 						</a>
 					</transition>
@@ -127,6 +80,284 @@
 
 
 </template>
+
+
+
+
+<script>
+import { useTokenStore } from "@/stores/store.js";
+import {usePlayerTracklistStore} from "@/stores/usePlayerTracklistStore.js";
+
+
+export default {
+
+	name: "musicPlayer",
+
+    setup(){
+      const store = useTokenStore();
+      const playerTracklistStore = usePlayerTracklistStore();
+
+      return{
+        store,
+        playerTracklistStore,
+
+        // waves_active: playerTracklistStore.waves_active, //track list & player 1
+        // currentSong: playerTracklistStore.currentSong, //track list & player 1
+        // currentlyPlaying: playerTracklistStore.currentlyPlaying, //track list & player 1
+      }
+    },
+
+	data() {
+		return {
+				musicPlaylist:this.playerTracklistStore.musicPlaylist, //track list & player
+				
+				audio: "", //track list & player
+				posterLoad: false, //track list & player
+				trackDuration: 0, //track list & player
+				checkingCurrentPositionInTrack: "", //track list & player
+
+				showProgressDot:false, //player
+				showVolumeDot:false, //player
+				modeIndex: 0, //player
+				currentTime: 0, //player
+				currentProgressBar: 0, //player
+				currentVolumeBar: 100, //player
+				currentMode:null, //player
+				Mode: [
+					{
+						title: "Order Play",
+						icon: "ri-order-play-fill"
+					},
+					{
+						title: "Shuffle Play",
+						icon: "ri-shuffle-fill"
+					},
+					{
+						title: "Single Cycle",
+						icon: "ri-repeat-one-fill"
+					},
+				], //player
+		};
+	},
+	
+
+
+	methods: {
+		timeFormat: function(s) {
+			return (s - (s %= 60)) / 60 + (9 < s ? ":" : ":0") + s;
+		}, //player
+		switchMode: function(n) {
+            this.currentMode=n
+            if ((this.currentMode === "Shuffle Play" && this.modeIndex === 1) || (this.currentMode === "Single Cycle" && this.modeIndex === 2) ){
+				this.currentMode=null
+			}
+            if (this.currentMode === "Shuffle Play"){
+				this.modeIndex = 1
+            }
+            if (this.currentMode === "Single Cycle"){
+				this.modeIndex = 2
+            }
+
+			if (this.currentMode===null){
+				this.modeIndex = 0
+            }
+		}, //player
+		prevIndex: function() {
+			switch (this.modeIndex) {
+				case 0:
+					//console.log('prev song')
+					this.playerTracklistStore.currentSong = (this.playerTracklistStore.currentSong - 1 + this.playerTracklistStore.musicPlaylist.length) % this.playerTracklistStore.musicPlaylist.length;
+					break;
+				case 1:
+					//console.log('random song')
+					this.playerTracklistStore.currentSong = Math.floor(Math.random() * this.playerTracklistStore.musicPlaylist.length);
+					break;
+				case 2: //console.log('repeat current song')
+			}
+			return this.playerTracklistStore.currentSong;
+		}, // player
+		nextSong: function() {
+			this.changeSong(this.nextIndex())
+			this.playerTracklistStore.waves_active = this.playerTracklistStore.currentSong
+		}, //player
+		prevSong: function() {
+			this.changeSong(this.prevIndex())
+			this.playerTracklistStore.waves_active = this.playerTracklistStore.currentSong
+		}, //player
+		clickProgress: function(event){
+			this.updateBar(event.pageX);
+		}, //player
+		clickVolume: function(event){
+			this.updateVolume(event.pageX);
+		}, //player
+		updateVolume: function(x){
+			var volumeProgress = this.$refs.volumeProgress;
+			var position = x - volumeProgress.getBoundingClientRect().left;
+			var percentage = (100 * position) / volumeProgress.offsetWidth;
+			if (percentage > 100) {
+				percentage = 100;
+			}
+			if (percentage < 0) {
+				percentage = 0;
+			}
+			this.audio.volume = percentage / 100
+			this.currentVolumeBar = percentage
+		}, //player
+		updateBar: function(x){
+			var progress = this.$refs.progress;
+			var maxduration = this.audio.duration;
+			var position = x - progress.getBoundingClientRect().left;
+			var percentage = (100 * position) / progress.offsetWidth;
+			if (percentage > 100) {
+				percentage = 100;
+			}
+			if (percentage < 0) {
+				percentage = 0;
+			}
+			// this.audio.currentTime
+		
+			this.audio.currentTime = (maxduration * percentage) / 100;
+			console.log(this.audio.currentTime)
+			console.log((maxduration * percentage) / 100)
+			this.currentTime = percentage / 100
+			this.currentProgressBar = percentage
+		},//player
+
+		nextIndex: function() {
+			switch (this.modeIndex) {
+				case 0:
+					//console.log('next song')
+					this.playerTracklistStore.currentSong = (this.playerTracklistStore.currentSong + 1) % this.playerTracklistStore.musicPlaylist.length;
+					break;
+				case 1:
+					//console.log('randon song')
+					this.playerTracklistStore.currentSong = Math.floor(Math.random() * this.playerTracklistStore.musicPlaylist.length);
+					break;
+				case 2: //console.log('repeat current song')
+			}
+			return this.playerTracklistStore.currentSong;
+		}, //player & track list
+
+
+
+
+
+
+		clickTrackTemplate(index){
+			if (!this.playerTracklistStore.currentlyPlaying && index != this.playerTracklistStore.currentSong){
+				this.changeSong(index)
+				this.playerTracklistStore.waves_active = index
+				this.playAudio()
+			}
+			else if(this.playerTracklistStore.currentlyPlaying && index != this.playerTracklistStore.currentSong){
+				this.changeSong(index)
+				this.playerTracklistStore.waves_active = index
+			}
+		},
+
+		changeSong: function(index, pausePrev = true) {
+			var wasPlaying = this.playerTracklistStore.currentlyPlaying;
+			if (pausePrev == true) {
+				this.stopAudio();
+			}
+			this.playerTracklistStore.currentSong = index;
+			var audioFile = this.store.mediaUrl + 
+								this.playerTracklistStore.musicPlaylist[this.playerTracklistStore.currentSong].song_path;
+			this.audio = new Audio(audioFile);
+			this.posterLoad = false;
+			if(this.playerTracklistStore.musicPlaylist[this.playerTracklistStore.currentSong].icon_path !== undefined) this.posterLoad = true;
+			var that = this;
+			this.audio.addEventListener("loadedmetadata", function() {
+				that.trackDuration = Math.round(this.duration);
+			});
+			this.audio.addEventListener("ended", this.handleEnded);
+			if (wasPlaying) {
+				this.playPauseAudio(this.playerTracklistStore.musicPlaylist.indexOf(this.playerTracklistStore.currentSong))
+			}
+			this.audio.volume = this.currentVolumeBar / 100
+		}, //player & track list
+
+		playPauseAudio: function(index) {
+			if (!this.playerTracklistStore.currentlyPlaying) {
+				this.playerTracklistStore.waves_active = index
+				this.playAudio()
+			}
+			else{
+				this.playerTracklistStore.waves_active = null
+				this.stopAudio()
+			}
+			
+		}, //player & track list
+		playAudio: function() {
+			this.getCurrentTimeEverySecond();
+			this.playerTracklistStore.currentlyPlaying = true;
+			this.audio.play();
+		}, //player & track list
+		stopAudio: function() {
+			this.audio.pause();
+			this.playerTracklistStore.currentlyPlaying = false;
+			clearTimeout(this.checkingCurrentPositionInTrack);
+		}, //player & track list
+		handleEnded: function() {
+			this.changeSong(this.nextIndex());
+		}, //player & track list
+		getCurrentTimeEverySecond: function() {
+			var that = this;
+			this.checkingCurrentPositionInTrack = setTimeout(
+				function() {
+					that.currentTime = that.audio.currentTime;
+					that.currentProgressBar =
+						that.audio.currentTime / that.trackDuration * 100;
+					that.getCurrentTimeEverySecond();
+				}.bind(this),
+				500
+			);
+		},//player & track list
+
+	},
+	created(){
+		this.emitter.on('changeSong', (index, pausePrev=true) => {
+			this.changeSong(index, pausePrev)
+		})
+
+	},
+	mounted() {
+
+		this.emitter.on('playPauseAudio', (index) => {
+			this.playPauseAudio(index)
+		})
+
+		this.emitter.on('clickTrackTemplate', (index) => {
+			this.clickTrackTemplate(index)
+		})
+
+		this.changeSong(this.playerTracklistStore.currentSong, false);
+		this.audio.loop = false;
+		console.log(this.audio)
+	},
+
+	watch: {
+		currentTime: function() {
+			this.currentTime = Math.round(this.currentTime);
+		}
+	},
+	computed: {
+		currentTimeShow() {
+			return this.timeFormat(this.currentTime);
+		},
+		trackDurationShow() {
+			return this.timeFormat(this.trackDuration);
+		},
+	},
+	beforeUnmount: function() {
+		this.audio.pause()
+		this.audio.removeEventListener("ended", this.handleEnded);
+		this.audio.removeEventListener("loadedmetadata", this.handleEnded);
+
+		clearTimeout(this.checkingCurrentPositionInTrack);
+	}
+};
+</script>
 
 
 
@@ -251,271 +482,6 @@
 
 
 
-<script>
-import { useTokenStore } from "@/stores/store.js";
-import {usePlayerTracklistStore} from "@/stores/usePlayerTracklistStore.js";
-
-
-export default {
-
-	name: "MusicPlayer",
-
-    setup(){
-      const store = useTokenStore();
-      const playerTracklistStore = usePlayerTracklistStore();
-
-      return{
-        store,
-        playerTracklistStore,
-
-
-      }
-    },
-
-	data() {
-		return {
-				waves_active: null, //track list & player
-				highlighted:null, //track list
-				musicPlaylist:this.playerTracklistStore.musicPlaylist, //track list & player
-				showProgressDot:false, //player
-				showVolumeDot:false, //player
-				audio: "", //track list & player
-				posterLoad: false, //track list & player
-				currentlyPlaying: false, //track list & player
-				modeIndex: 0, //player
-				currentSong: 0, //track list & player
-				currentTime: 0, //player
-				trackDuration: 0, //track list & player
-				currentProgressBar: 0, //player
-				currentVolumeBar: 100, //player
-				checkingCurrentPositionInTrack: "", //track list & player 
-				currentMode:null, //player
-				Mode: [
-					{
-						title: "Order Play",
-						icon: "ri-order-play-fill"
-					},
-					{
-						title: "Shuffle Play",
-						icon: "ri-shuffle-fill"
-					},
-					{
-						title: "Single Cycle",
-						icon: "ri-repeat-one-fill"
-					},
-				], //player
-		};
-	},
-	methods: {
-		clickTrackTemplate(index){
-			if (!this.currentlyPlaying && index != this.currentSong){
-					this.changeSong(index)
-					this.waves_active = index
-					this.playAudio()
-				}
-			else if(this.currentlyPlaying && index != this.currentSong){
-					this.changeSong(index)
-					this.waves_active = index
-				}
-		},
-
-		timeFormat: function(s) {
-			return (s - (s %= 60)) / 60 + (9 < s ? ":" : ":0") + s;
-		}, //player
-
-		switchMode: function(n) {
-            this.currentMode=n
-            
-            if ((this.currentMode === "Shuffle Play" && this.modeIndex === 1) || (this.currentMode === "Single Cycle" && this.modeIndex === 2) ){
-				this.currentMode=null
-			}
-            if (this.currentMode === "Shuffle Play"){
-				this.modeIndex = 1
-            }
-            if (this.currentMode === "Single Cycle"){
-				this.modeIndex = 2
-            }
-
-			if (this.currentMode===null){
-				this.modeIndex = 0
-            }
-
-		}, //player
-		nextIndex: function() {
-			switch (this.modeIndex) {
-				case 0:
-					console.log('next song')
-					this.currentSong = (this.currentSong + 1) % this.musicPlaylist.length;
-					break;
-				case 1:
-					console.log('randon song')
-					this.currentSong = Math.floor(Math.random() * this.musicPlaylist.length);
-					break;
-				case 2: console.log('repeat current song')
-			}
-			return this.currentSong;
-		}, //player & track list
-		prevIndex: function() {
-			switch (this.modeIndex) {
-				case 0:
-					console.log('prev song')
-					this.currentSong = (this.currentSong - 1 + this.musicPlaylist.length) % this.musicPlaylist.length;
-					break;
-				case 1:
-					console.log('random song')
-					this.currentSong = Math.floor(Math.random() * this.musicPlaylist.length);
-					break;
-				case 2: console.log('repeat current song')
-			}
-			return this.currentSong;
-		}, // player
-		nextSong: function() {
-			this.changeSong(this.nextIndex());
-		}, //player
-
-		prevSong: function() {
-			this.changeSong(this.prevIndex());
-		}, //player
-
-		changeSong: function(index, pausePrev = true) {
-			var wasPlaying = this.currentlyPlaying;
-			if (pausePrev == true) {
-				this.stopAudio();
-			}
-			this.currentSong = index;
-
-
-			var audioFile = this.store.mediaUrl + 
-								this.musicPlaylist[this.currentSong].song_path;
-			this.audio = new Audio(audioFile);
-
-			this.posterLoad = false;
-			if(this.musicPlaylist[this.currentSong].icon_path !== undefined) this.posterLoad = true;
-
-			
-			var that = this;
-			this.audio.addEventListener("loadedmetadata", function() {
-				that.trackDuration = Math.round(this.duration);
-			});
-			this.audio.addEventListener("ended", this.handleEnded);
-			if (wasPlaying) {
-				this.playPauseAudio(this.musicPlaylist.indexOf(this.currentSong))
-			}
-
-			this.audio.volume = this.currentVolumeBar / 100
-		}, //player & track list
-		isCurrentSong: function(index) {
-			if (this.currentSong == index) {
-				return true;
-			}
-			return false;
-		}, //track list
-
-		playPauseAudio: function(index) {
-			if (!this.currentlyPlaying) {
-				this.waves_active = index
-				this.playAudio()
-			}
-			else{
-				this.waves_active = null
-				this.stopAudio()
-			}
-			
-
-		}, //player & track list
-		playAudio: function() {
-			this.getCurrentTimeEverySecond();
-			this.currentlyPlaying = true;
-			this.audio.play();
-		}, //player & track list
-		stopAudio: function() {
-			this.audio.pause();
-			this.currentlyPlaying = false;
-			clearTimeout(this.checkingCurrentPositionInTrack);
-		}, //player & track list
-		handleEnded: function() {
-			this.changeSong(this.nextIndex());
-		}, //player & track list
-		getCurrentTimeEverySecond: function() {
-			var that = this;
-			this.checkingCurrentPositionInTrack = setTimeout(
-				function() {
-					that.currentTime = that.audio.currentTime;
-					that.currentProgressBar =
-						that.audio.currentTime / that.trackDuration * 100;
-					that.getCurrentTimeEverySecond();
-				}.bind(this),
-				500
-			);
-		},//player & track list
-		clickProgress: function(event){
-			this.updateBar(event.pageX);
-		}, //player
-		clickVolume: function(event){
-			this.updateVolume(event.pageX);
-		}, //player
-		updateVolume: function(x){
-			var volumeProgress = this.$refs.volumeProgress;
-			var position = x - volumeProgress.getBoundingClientRect().left;
-			var percentage = (100 * position) / volumeProgress.offsetWidth;
-			if (percentage > 100) {
-				percentage = 100;
-			}
-			if (percentage < 0) {
-				percentage = 0;
-			}
-
-			this.audio.volume = percentage / 100
-			this.currentVolumeBar = percentage
-		}, //player
-
-		updateBar: function(x){
-			var progress = this.$refs.progress;
-			var maxduration = this.audio.duration;
-			var position = x - progress.getBoundingClientRect().left;
-			var percentage = (100 * position) / progress.offsetWidth;
-			if (percentage > 100) {
-				percentage = 100;
-			}
-			if (percentage < 0) {
-				percentage = 0;
-			}
-			// this.audio.currentTime
-		
-			this.audio.currentTime = (maxduration * percentage) / 100;
-			console.log(this.audio.currentTime)
-			console.log((maxduration * percentage) / 100)
-			this.currentTime = percentage / 100
-			this.currentProgressBar = percentage
-		},//player
-
-	},
-	mounted() {
-		this.changeSong(this.currentSong, false);
-		this.audio.loop = false;
-	},
-	watch: {
-		currentTime: function() {
-			this.currentTime = Math.round(this.currentTime);
-		}
-	},
-	computed: {
-		currentTimeShow() {
-			return this.timeFormat(this.currentTime);
-		},
-		trackDurationShow() {
-			return this.timeFormat(this.trackDuration);
-		},
-	},
-	beforeUnmount: function() {
-		this.audio.pause()
-		this.audio.removeEventListener("ended", this.handleEnded);
-		this.audio.removeEventListener("loadedmetadata", this.handleEnded);
-
-		clearTimeout(this.checkingCurrentPositionInTrack);
-	}
-};
-</script>
 
 <style lang="stylus" scoped>
 @import url('https://fonts.googleapis.com/css2?family=Inconsolata&family=Montserrat&family=Raleway&display=swap');
