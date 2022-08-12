@@ -2,6 +2,7 @@
   <div>
     <Header />
     <router-view />
+    
     <!-- <h1>access expired: {{store.access_expired}}</h1>
     <h1>authenticated: {{store.authenticated}}</h1> -->
   </div>
@@ -12,17 +13,10 @@
 
 <script>
 import Header from "./components/VueHeader.vue"
-import { usePlayerTracklistStore } from "./stores/usePlayerTracklistStore";
 
   export default{
 
     setup(){
-      const PlayerTracklistStore = usePlayerTracklistStore()
-      const TokenStore = usePlayerTracklistStore()
-      return{
-        PlayerTracklistStore,
-        TokenStore
-      }
     },
 
     components:{

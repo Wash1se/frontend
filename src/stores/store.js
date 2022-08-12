@@ -14,7 +14,6 @@ export const useTokenStore = defineStore('token', {
     mediaUrl: 'https://res.cloudinary.com/degn0i1cg/raw/upload/v1/',
     authenticated: false,
     access_expired: true,
-    musicPlaylist: null,
   }),
   getters:{
       getToken: (state) => state.token
@@ -42,7 +41,7 @@ export const useTokenStore = defineStore('token', {
             }
           })
           .catch((error) => {
-            // console.clear()
+            console.log(error)
             let field = error.response.data.detail
             let type = "error"
             let header = error.response.data.error
@@ -92,10 +91,6 @@ export const useTokenStore = defineStore('token', {
         this.token = access
         this.access_expired = false
       },
-
-      async setMusicPlaylist(MusicPlaylist){
-        this.musicPlaylist = MusicPlaylist
-      }
 
   },
   persist: {

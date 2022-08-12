@@ -20,6 +20,16 @@
           </li>
         </div>
         <div v-if="store.authenticated === true">
+          <li class="nav-item active">
+            <router-link to="/all-tracks">
+                all tracks
+            </router-link>
+          </li>
+          <li class="nav-item active">
+            <router-link to="/collection/tracks">
+                liked tracks
+            </router-link>
+          </li>
           <button v-on:click="logout">Logout</button>
         </div>
       </ul>

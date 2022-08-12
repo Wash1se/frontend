@@ -2,16 +2,17 @@ import { defineStore } from 'pinia'
 
 export const usePlayerTracklistStore = defineStore('PlayerTracklist', {
   state:() => ({
-    musicPlaylist: null,
+    favouriteMusic: null,
+    allTracks:null,
+    currentQueue:null,
     
     currentlyPlaying: false,
     currentSong: 0,
     waves_active: null,
-    currentVolumeBar: 100,
   }),
   actions:{
-    async setMusicPlaylist(MusicPlaylist){
-        this.musicPlaylist = MusicPlaylist
+    async setFavouriteMusic(favouriteMusic){
+        this.favouriteMusic = favouriteMusic
     }
   },
   persist: {

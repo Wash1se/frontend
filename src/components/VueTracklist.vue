@@ -1,7 +1,7 @@
 <template>
 	<div class="audioPlayerList">
 			<div style="padding:0px 20px;margin:10px 0 10px 0;">
-				<table class="item" v-for="(item,index) in musicPlaylist"
+				<table class="item" v-for="(item,index) in music"
 				:key="item.id"
 				@mouseover="highlighted = item.id"
 				@mouseleave="highlighted = null"
@@ -10,7 +10,7 @@
 						<transition v-if="highlighted === item.id"
 						name="fade" mode="out-in" style="display: flex;justify-content: center;width: 100%;" appear>
 
-							<a class="button play" @click="this.emitter.emit('playPauseAudio', index)" title="Play/Pause Song" :key="playerTracklistStore.currentSong + playerTracklistStore.currentlyPlaying">
+							<a class="button play" @click="playPauseAudio(index)" title="Play/Pause Song" :key="playerTracklistStore.currentSong + playerTracklistStore.currentlyPlaying">
 								<v-icon :name="playerTracklistStore.currentlyPlaying && playerTracklistStore.currentSong === index ? 'hi-solid-pause' : 'bi-play-circle-fill' " 
 								:key="1" class="icon" scale="2" fill="red"/>
 							</a>
@@ -51,12 +51,16 @@
 <script>
 import { useTokenStore } from "@/stores/store.js";
 import {usePlayerTracklistStore} from "@/stores/usePlayerTracklistStore.js";
-// import Vue from 'vue'
 
 
 export default {
 
+	components:{
+	},
+
 	name: "trackList",
+
+	props:['music'],
 
     setup(){
       const store = useTokenStore();
@@ -78,7 +82,7 @@ export default {
 		return {
 				highlighted:null, //track list
 
-				musicPlaylist:this.playerTracklistStore.musicPlaylist, //track list & player
+				// favouriteMusic:this.favouriteMusic, //track list & player
 
 				// waves_active: Vue.prototype.$waves_active, //track list & player
 				// audio: Vue.prototype.$audio, //track list & player
@@ -98,6 +102,11 @@ export default {
 			}
 			return false;
 		}, //track list
+
+		playPauseAudio(index){
+			this.playerTracklistStore.currentQueue = this.music
+			this.emitter.emit('playPauseAudio', index)
+		},
 
 	},
 

@@ -4,14 +4,14 @@
 
 			<div class="albumDetails">
 				<transition name="slide-fade" mode="out-in" appear>
-					<img class="image" :key="playerTracklistStore.currentSong" :src="store.mediaUrl+playerTracklistStore.musicPlaylist[playerTracklistStore.currentSong].icon_path" alt="">
+					<img class="image" :key="playerTracklistStore.currentSong" :src="store.mediaUrl+playerTracklistStore.currentQueue[playerTracklistStore.currentSong].icon_path" alt="">
 				</transition>
 				<div style="width: 70%; display: flex;	flex-wrap: wrap;flex-direction: column;justify-content: center;">
 					<transition name="slide-fade" mode="out-in" appear>
-						<p class="title" :key="playerTracklistStore.currentSong">{{ playerTracklistStore.musicPlaylist[playerTracklistStore.currentSong].song_name }}</p>
+						<p class="title" :key="playerTracklistStore.currentSong">{{ playerTracklistStore.currentQueue[playerTracklistStore.currentSong].song_name }}</p>
 					</transition>
 					<transition name="slide-fade" mode="out-in" appear>
-						<p class="artist" :key="playerTracklistStore.currentSong">{{ playerTracklistStore.musicPlaylist[playerTracklistStore.currentSong].song_author }}</p>
+						<p class="artist" :key="playerTracklistStore.currentSong">{{ playerTracklistStore.currentQueue[playerTracklistStore.currentSong].song_author }}</p>
 					</transition>
 				</div>
 			</div>
@@ -91,7 +91,9 @@ import {usePlayerTracklistStore} from "@/stores/usePlayerTracklistStore.js";
 
 export default {
 
-	name: "musicPlayer",
+	name: "MusicPlayer",
+
+	// props:['playerTracklistStore.currentQueue'],
 
     setup(){
       const store = useTokenStore();
@@ -109,7 +111,7 @@ export default {
 
 	data() {
 		return {
-				musicPlaylist:this.playerTracklistStore.musicPlaylist, //track list & player
+				// playerTracklistStore.currentQueue:this.playerTracklistStore.currentQueue, //track list & player
 				
 				audio: "", //track list & player
 				posterLoad: false, //track list & player
@@ -166,11 +168,11 @@ export default {
 			switch (this.modeIndex) {
 				case 0:
 					//console.log('prev song')
-					this.playerTracklistStore.currentSong = (this.playerTracklistStore.currentSong - 1 + this.playerTracklistStore.musicPlaylist.length) % this.playerTracklistStore.musicPlaylist.length;
+					this.playerTracklistStore.currentSong = (this.playerTracklistStore.currentSong - 1 + this.playerTracklistStore.currentQueue.length) % this.playerTracklistStore.currentQueue.length;
 					break;
 				case 1:
 					//console.log('random song')
-					this.playerTracklistStore.currentSong = Math.floor(Math.random() * this.playerTracklistStore.musicPlaylist.length);
+					this.playerTracklistStore.currentSong = Math.floor(Math.random() * this.playerTracklistStore.currentQueue.length);
 					break;
 				case 2: //console.log('repeat current song')
 			}
@@ -227,11 +229,11 @@ export default {
 			switch (this.modeIndex) {
 				case 0:
 					//console.log('next song')
-					this.playerTracklistStore.currentSong = (this.playerTracklistStore.currentSong + 1) % this.playerTracklistStore.musicPlaylist.length;
+					this.playerTracklistStore.currentSong = (this.playerTracklistStore.currentSong + 1) % this.playerTracklistStore.currentQueue.length;
 					break;
 				case 1:
 					//console.log('randon song')
-					this.playerTracklistStore.currentSong = Math.floor(Math.random() * this.playerTracklistStore.musicPlaylist.length);
+					this.playerTracklistStore.currentSong = Math.floor(Math.random() * this.playerTracklistStore.currentQueue.length);
 					break;
 				case 2: //console.log('repeat current song')
 			}
@@ -262,17 +264,17 @@ export default {
 			}
 			this.playerTracklistStore.currentSong = index;
 			var audioFile = this.store.mediaUrl + 
-								this.playerTracklistStore.musicPlaylist[this.playerTracklistStore.currentSong].song_path;
+								this.playerTracklistStore.currentQueue[this.playerTracklistStore.currentSong].song_path;
 			this.audio = new Audio(audioFile);
 			this.posterLoad = false;
-			if(this.playerTracklistStore.musicPlaylist[this.playerTracklistStore.currentSong].icon_path !== undefined) this.posterLoad = true;
+			if(this.playerTracklistStore.currentQueue[this.playerTracklistStore.currentSong].icon_path !== undefined) this.posterLoad = true;
 			var that = this;
 			this.audio.addEventListener("loadedmetadata", function() {
 				that.trackDuration = Math.round(this.duration);
 			});
 			this.audio.addEventListener("ended", this.handleEnded);
 			if (wasPlaying) {
-				this.playPauseAudio(this.playerTracklistStore.musicPlaylist.indexOf(this.playerTracklistStore.currentSong))
+				this.playPauseAudio(this.playerTracklistStore.currentQueue.indexOf(this.playerTracklistStore.currentSong))
 			}
 			this.audio.volume = this.currentVolumeBar / 100
 		}, //player & track list
@@ -317,12 +319,15 @@ export default {
 
 	},
 	created(){
+		console.log('created')
+
 		this.emitter.on('changeSong', (index, pausePrev=true) => {
 			this.changeSong(index, pausePrev)
 		})
 
 	},
 	mounted() {
+		console.log('mounted')
 
 		this.emitter.on('playPauseAudio', (index) => {
 			this.playPauseAudio(index)
