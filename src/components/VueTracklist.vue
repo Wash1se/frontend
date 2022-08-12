@@ -5,13 +5,13 @@
 				:key="item.id"
 				@mouseover="highlighted = item.id"
 				@mouseleave="highlighted = null"
-				@click="this.emitter.emit('clickTrackTemplate', index)">
+				>
 					<td class="id-waves-or-btn" style="justify-content: center!important;">
 						<transition v-if="highlighted === item.id"
 						name="fade" mode="out-in" style="display: flex;justify-content: center;width: 100%;" appear>
 
 							<a class="button play" @click="playPauseAudio(index)" title="Play/Pause Song" :key="playerTracklistStore.currentSong + playerTracklistStore.currentlyPlaying">
-								<v-icon :name="playerTracklistStore.currentlyPlaying && playerTracklistStore.currentSong === index ? 'hi-solid-pause' : 'bi-play-circle-fill' " 
+								<v-icon  :name="playerTracklistStore.currentlyPlaying && playerTracklistStore.currentSong === index ? 'hi-solid-pause' : 'bi-play-circle-fill' " 
 								:key="1" class="icon" scale="2" fill="red"/>
 							</a>
 						</transition>
@@ -103,9 +103,18 @@ export default {
 			return false;
 		}, //track list
 
-		playPauseAudio(index){
+		async playPauseAudio(index){
+			if (!this.playerTracklistStore.currentQueue){
+				this.playerTracklistStore.currentQueue = this.music
+				await this.emitter.emit('playPauseAudio', index)
+				this.emitter.emit('playPauseAudio', index)
+			}else{
 			this.playerTracklistStore.currentQueue = this.music
 			this.emitter.emit('playPauseAudio', index)
+			this.emitter.emit('clickTrackTemplate', index)
+			}
+			
+
 		},
 
 	},
@@ -217,7 +226,9 @@ export default {
     cursor: pointer;
 }
 
-
+.audioPlayerList .is-liked .fas{
+	color: #1ed760;
+}
 </style>
 
 

@@ -1,7 +1,5 @@
 <template>
-
 		<div class="audioPlayerUI">
-
 			<div class="albumDetails">
 				<transition name="slide-fade" mode="out-in" appear>
 					<img class="image" :key="playerTracklistStore.currentSong" :src="store.mediaUrl+playerTracklistStore.currentQueue[playerTracklistStore.currentSong].icon_path" alt="">
@@ -15,11 +13,7 @@
 					</transition>
 				</div>
 			</div>
-
-
 			<div class="timeAndProgress">
-
-
 				<div class="playerButtons">
 					<!-- shuffle play btn -->
 					<a class="button" id="mode" @click="switchMode(Mode[1].title)" :title="Mode[1].title" ><v-icon :name="Mode[1].icon" class="icon" :class="{selected:modeIndex===1}" scale="1.2" /></a>
