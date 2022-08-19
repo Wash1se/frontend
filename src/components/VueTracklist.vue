@@ -38,7 +38,8 @@
 
 					<td class="album">Пока пусто</td>
 
-					<td class="is-liked"><i class="bi fas bi-heart-fill"></i></td>
+					<td class="is-liked"><i @click='likeOrUnlikeSong(item)'
+						:class="item.is_liked ? 'bi fas bi-heart-fill liked' : 'bi fas bi-heart'"></i></td>
 
 
 					<td class="duration">{{item.duration}}</td>
@@ -52,6 +53,7 @@
 import { useTokenStore } from "@/stores/store.js";
 import {usePlayerTracklistStore} from "@/stores/usePlayerTracklistStore.js";
 
+import API from '@/utils/api.js';
 
 export default {
 
@@ -70,11 +72,7 @@ export default {
         store,
         playerTracklistStore,
 
-        // waves_active: playerTracklistStore.waves_active, //track list & player 1
-        // currentSong: playerTracklistStore.currentSong, //track list & player 1
-        // currentlyPlaying: playerTracklistStore.currentlyPlaying, //track list & player 1
-
-        
+       
       }
     },
 
@@ -82,20 +80,15 @@ export default {
 		return {
 				highlighted:null, //track list
 
-				// favouriteMusic:this.favouriteMusic, //track list & player
-
-				// waves_active: Vue.prototype.$waves_active, //track list & player
-				// audio: Vue.prototype.$audio, //track list & player
-				// posterLoad: Vue.prototype.$posterLoad, //track list & player
-				// currentlyPlaying: Vue.prototype.$currentlyPlaying, //track list & player
-				// currentSong: Vue.prototype.$currentSong, //track list & player
-				// trackDuration: Vue.prototype.$trackDuration, //track list & player
-				// checkingCurrentPositionInTrack: Vue.prototype.$checkingCurrentPositionInTrack, //track list & player
-
-
 		};
 	},
 	methods: {
+		likeOrUnlikeSong(item){
+			item.is_liked = !item.is_liked
+			API
+			.put(this.store.mainUrl+`audio/update-liked/${item.id}`, {'favourite': item.is_liked})
+		},
+
 		isCurrentSong: function(index) {
 			if (this.playerTracklistStore.currentSong == index) {
 				return true;
@@ -217,7 +210,6 @@ export default {
 
 .audioPlayerList .item .is-liked{
 	font-size: 20px;
-    color: #fff;
     display: flex;
     align-items: center;
 }
@@ -226,8 +218,12 @@ export default {
     cursor: pointer;
 }
 
-.audioPlayerList .is-liked .fas{
+.audioPlayerList .is-liked .liked{
 	color: #1ed760;
+}
+
+.audioPlayerList .is-liked .unliked{
+	color: #fff;
 }
 </style>
 

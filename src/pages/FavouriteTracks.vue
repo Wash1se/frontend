@@ -26,9 +26,10 @@
           </table>
     </div>
 
-    <VueTracklist :music="playerTracklistStore.favouriteMusic"/>
+    <VueTracklist :music="playerTracklistStore.allTracks.filter(song => song.is_liked === true)"/>
+    <!-- playerTracklistStore.favouriteMusic -->
 
-    <h1>{{playerTracklistStore.favouriteMusic}}</h1>
+    <h1>{{playerTracklistStore.allTracks.filter(song => song.is_liked === true)}}</h1>
 
     
 
@@ -40,7 +41,7 @@ import { useTokenStore } from '@/stores/store.js';
 import { usePlayerTracklistStore } from '@/stores/usePlayerTracklistStore.js';
 
 import Message from '@/components/VueMessage.vue';
-import API from '@/utils/api.js';
+// import API from '@/utils/api.js';
 import VueTracklist from '@/components/VueTracklist.vue';
 
 
@@ -68,24 +69,8 @@ export default {
     };
   },
   methods:{
-    async getFavouriteSongs(){
-      API
-      .get(this.store.mainUrl+"audio/favourite-songs")
-      .then(response => {
-          this.playerTracklistStore.setFavouriteMusic(response.data)
-        })
-      .catch(error => {
-          console.log(error)
-          let err = error.response.data
-          this.field = err.detail
-          this.type = "error"
-          this.header = err.error
-          this.hide_message = false
-        });
-    }
     },
   beforeMount(){
-    this.getFavouriteSongs()
   }
   
 }

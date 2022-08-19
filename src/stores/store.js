@@ -6,12 +6,12 @@ import API from '@/utils/api.js';
 export const useTokenStore = defineStore('token', {
   state:() => ({
     token: null,
+    mainUrl: 'http://127.0.0.1:8000/',
+    mainAuthUrl: 'http://127.0.0.1:8000/auth/',
+    mediaUrl: 'https://res.cloudinary.com/dzkj4bc2d/raw/upload/v1/',
     // mainUrl: 'https://music-platform228.herokuapp.com/',
     // mainAuthUrl: 'https://music-platform228.herokuapp.com/auth/',
-    // mediaUrl: 'https://music-platform228.herokuapp.com/media/',
-    mainUrl: 'https://music-platform228.herokuapp.com/',
-    mainAuthUrl: 'https://music-platform228.herokuapp.com/auth/',
-    mediaUrl: 'https://res.cloudinary.com/degn0i1cg/raw/upload/v1/',
+    // mediaUrl: 'https://res.cloudinary.com/dzkj4bc2d/raw/upload/v1/',
     authenticated: false,
     access_expired: true,
   }),
