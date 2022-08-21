@@ -7,7 +7,8 @@ export const usePlayerTracklistStore = defineStore('PlayerTracklist', {
     
     currentlyPlaying: false,
     currentSong: 0,
-    waves_active: null,
+    currendSongId:null,
+    track_active: null,
   }),
   actions:{
     async setFavouriteMusic(favouriteMusic){

@@ -11,15 +11,15 @@
 						name="fade" mode="out-in" style="display: flex;justify-content: center;width: 100%;" appear>
 
 							<a class="button play" @click="playPauseAudio(index)" title="Play/Pause Song" :key="playerTracklistStore.currentSong + playerTracklistStore.currentlyPlaying">
-								<v-icon  :name="playerTracklistStore.currentlyPlaying && playerTracklistStore.currentSong === index ? 'hi-solid-pause' : 'bi-play-circle-fill' " 
+								<v-icon  :name="playerTracklistStore.currentlyPlaying && playerTracklistStore.track_active === item.id ? 'hi-solid-pause' : 'bi-play-circle-fill' " 
 								:key="1" class="icon" scale="2" fill="red"/>
 							</a>
 						</transition>
 
-						<div v-if="highlighted != item.id && playerTracklistStore.waves_active!=index" 
+						<div v-if="highlighted != item.id && playerTracklistStore.track_active != item.id" 
 						style="display: flex;justify-content: center;width: 100%;" class="index">{{index+1}}</div>
 					
-						<div v-if="playerTracklistStore.waves_active===index && highlighted != item.id" class="wave active">
+						<div v-if="playerTracklistStore.track_active===item.id && highlighted != item.id" class="wave active">
 							<div class="wave1"></div>
 							<div class="wave1"></div>
 							<div class="wave1"></div>
@@ -72,13 +72,28 @@ export default {
         store,
         playerTracklistStore,
 
-       
+        // track_active: playerTracklistStore.track_active, //track list & player 1
+        // currentSong: playerTracklistStore.currentSong, //track list & player 1
+        // currentlyPlaying: playerTracklistStore.currentlyPlaying, //track list & player 1
+
+        
       }
     },
 
 	data() {
 		return {
 				highlighted:null, //track list
+
+				// favouriteMusic:this.favouriteMusic, //track list & player
+
+				// track_active: Vue.prototype.$track_active, //track list & player
+				// audio: Vue.prototype.$audio, //track list & player
+				// posterLoad: Vue.prototype.$posterLoad, //track list & player
+				// currentlyPlaying: Vue.prototype.$currentlyPlaying, //track list & player
+				// currentSong: Vue.prototype.$currentSong, //track list & player
+				// trackDuration: Vue.prototype.$trackDuration, //track list & player
+				// checkingCurrentPositionInTrack: Vue.prototype.$checkingCurrentPositionInTrack, //track list & player
+
 
 		};
 	},
@@ -87,14 +102,20 @@ export default {
 			item.is_liked = !item.is_liked
 			API
 			.put(this.store.mainUrl+`audio/update-liked/${item.id}`, {'favourite': item.is_liked})
+			.then(() => {
+			})
+			.catch(error => {
+				console.log(error)
+			});
+
 		},
 
-		isCurrentSong: function(index) {
-			if (this.playerTracklistStore.currentSong == index) {
-				return true;
-			}
-			return false;
-		}, //track list
+		// isCurrentSong: function(index) {
+		// 	if (this.playerTracklistStore.currentSong == index) {
+		// 		return true;
+		// 	}
+		// 	return false;
+		// }, //track list
 
 		async playPauseAudio(index){
 			if (!this.playerTracklistStore.currentQueue){
@@ -105,6 +126,7 @@ export default {
 			this.playerTracklistStore.currentQueue = this.music
 			this.emitter.emit('playPauseAudio', index)
 			this.emitter.emit('clickTrackTemplate', index)
+			
 			}
 			
 

@@ -97,7 +97,7 @@ export default {
         store,
         playerTracklistStore,
 
-        // waves_active: playerTracklistStore.waves_active, //track list & player 1
+        // track_active: playerTracklistStore.track_active, //track list & player 1
         // currentSong: playerTracklistStore.currentSong, //track list & player 1
         // currentlyPlaying: playerTracklistStore.currentlyPlaying, //track list & player 1
       }
@@ -174,11 +174,11 @@ export default {
 		}, // player
 		nextSong: function() {
 			this.changeSong(this.nextIndex())
-			this.playerTracklistStore.waves_active = this.playerTracklistStore.currentSong
+			this.playerTracklistStore.track_active = this.playerTracklistStore.currentQueue[this.playerTracklistStore.currentSong].id
 		}, //player
 		prevSong: function() {
 			this.changeSong(this.prevIndex())
-			this.playerTracklistStore.waves_active = this.playerTracklistStore.currentSong
+			this.playerTracklistStore.track_active = this.playerTracklistStore.currentQueue[this.playerTracklistStore.currentSong].id
 		}, //player
 		clickProgress: function(event){
 			this.updateBar(event.pageX);
@@ -237,19 +237,27 @@ export default {
 
 
 
-
-
 		clickTrackTemplate(index){
-			if (!this.playerTracklistStore.currentlyPlaying && index != this.playerTracklistStore.currentSong){
-				this.changeSong(index)
-				this.playerTracklistStore.waves_active = index
-				this.playAudio()
+			if (index != this.playerTracklistStore.currentSong){
+				if (!this.playerTracklistStore.currentlyPlaying) {
+					this.changeSong(index)
+					this.playerTracklistStore.track_active = this.playerTracklistStore.currentQueue[index].id
+					this.playAudio()
+				}
+				else{
+					this.changeSong(index)
+					this.playerTracklistStore.track_active = this.playerTracklistStore.currentQueue[index].id
+				}
 			}
-			else if(this.playerTracklistStore.currentlyPlaying && index != this.playerTracklistStore.currentSong){
-				this.changeSong(index)
-				this.playerTracklistStore.waves_active = index
-			}
+
 		},
+
+		isCurrentSong: function(song) {
+			if (this.playerTracklistStore.currentSongId == song.id) {
+				return song;
+			}
+			return false;
+		}, //track list
 
 		changeSong: function(index, pausePrev = true) {
 			var wasPlaying = this.playerTracklistStore.currentlyPlaying;
@@ -257,31 +265,35 @@ export default {
 				this.stopAudio();
 			}
 			this.playerTracklistStore.currentSong = index;
+			this.playerTracklistStore.currendSongId = this.playerTracklistStore.currentQueue[index].id
 			var audioFile = this.store.mediaUrl + 
-								this.playerTracklistStore.currentQueue[this.playerTracklistStore.currentSong].song_path;
+								this.playerTracklistStore.currentQueue[index].song_path;
 			this.audio = new Audio(audioFile);
 			this.posterLoad = false;
-			if(this.playerTracklistStore.currentQueue[this.playerTracklistStore.currentSong].icon_path !== undefined) this.posterLoad = true;
+			if(this.playerTracklistStore.currentQueue[index].icon_path !== undefined) this.posterLoad = true;
 			var that = this;
 			this.audio.addEventListener("loadedmetadata", function() {
 				that.trackDuration = Math.round(this.duration);
 			});
 			this.audio.addEventListener("ended", this.handleEnded);
 			if (wasPlaying) {
-				this.playPauseAudio(this.playerTracklistStore.currentQueue.indexOf(this.playerTracklistStore.currentSong))
+				this.playPauseAudio(index)
 			}
 			this.audio.volume = this.currentVolumeBar / 100
 		}, //player & track list
 
 		playPauseAudio: function(index) {
-			if (!this.playerTracklistStore.currentlyPlaying) {
-				this.playerTracklistStore.waves_active = index
-				this.playAudio()
+			if (index === this.playerTracklistStore.currentSong) {
+				if (!this.playerTracklistStore.currentlyPlaying) {
+					this.playerTracklistStore.track_active = this.playerTracklistStore.currentQueue[index].id
+					this.playAudio()
+				}
+				else{
+					this.playerTracklistStore.track_active = null
+					this.stopAudio()
+				}
 			}
-			else{
-				this.playerTracklistStore.waves_active = null
-				this.stopAudio()
-			}
+
 			
 		}, //player & track list
 		playAudio: function() {
@@ -296,7 +308,7 @@ export default {
 		}, //player & track list
 		handleEnded: function() {
 			this.changeSong(this.nextIndex());
-			this.playerTracklistStore.waves_active = this.playerTracklistStore.currentSong
+			this.playerTracklistStore.track_active = this.playerTracklistStore.currendSongId
 		}, //player & track list
 		getCurrentTimeEverySecond: function() {
 			var that = this;
