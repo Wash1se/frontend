@@ -1,10 +1,7 @@
 <template>
-  <div>
-    <Header />
-    <router-view />
-    
-    <!-- <h1>access expired: {{store.access_expired}}</h1>
-    <h1>authenticated: {{store.authenticated}}</h1> -->
+  <div class="app-template">
+    <Header class="header"/>
+    <router-view/>
   </div>
 </template>
 
@@ -31,8 +28,15 @@ import Header from "./components/VueHeader.vue"
 
 
 <style>
+
+.app-template{
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
 body{
-  background-color: #111727!important;
+  background-color: #121212!important;
 }
 h1{
   color: #E0CA3C!important;

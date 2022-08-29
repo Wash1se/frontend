@@ -1,6 +1,6 @@
 <template>
     <Message :type="type" :header="header" :hide_message="hide_message" @returned_show_value="hide_message = $event"/>
-    <VueTracklist :music="playerTracklistStore.allTracks" />
+    <VueTracklist :music="playerTracklistStore.allTracks" class="tracklist"/>
     <!-- <h1>{{playerTracklistStore.allTracks}}</h1> -->
 </template>
 
@@ -49,5 +49,8 @@ export default {
 </script>
 
 <style>
+  .tracklist{
+    width: 100%;
+  }
 </style>
 

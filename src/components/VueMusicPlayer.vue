@@ -238,7 +238,7 @@ export default {
 
 
 		clickTrackTemplate(index){
-			if (index != this.playerTracklistStore.currentSong){
+			if (this.playerTracklistStore.previousQueue[this.playerTracklistStore.currentSong].id != this.playerTracklistStore.currentQueue[index].id){
 				if (!this.playerTracklistStore.currentlyPlaying) {
 					this.changeSong(index)
 					this.playerTracklistStore.track_active = this.playerTracklistStore.currentQueue[index].id
@@ -254,7 +254,7 @@ export default {
 
 		isCurrentSong: function(song) {
 			if (this.playerTracklistStore.currentSongId == song.id) {
-				return song;
+				return true;
 			}
 			return false;
 		}, //track list
@@ -265,7 +265,7 @@ export default {
 				this.stopAudio();
 			}
 			this.playerTracklistStore.currentSong = index;
-			this.playerTracklistStore.currendSongId = this.playerTracklistStore.currentQueue[index].id
+			// this.playerTracklistStore.currentSongId = this.playerTracklistStore.currentQueue[index].id
 			var audioFile = this.store.mediaUrl + 
 								this.playerTracklistStore.currentQueue[index].song_path;
 			this.audio = new Audio(audioFile);
@@ -308,7 +308,7 @@ export default {
 		}, //player & track list
 		handleEnded: function() {
 			this.changeSong(this.nextIndex());
-			this.playerTracklistStore.track_active = this.playerTracklistStore.currendSongId
+			// this.playerTracklistStore.track_active = this.playerTracklistStore.currentSongId
 		}, //player & track list
 		getCurrentTimeEverySecond: function() {
 			var that = this;
@@ -532,7 +532,7 @@ export default {
 			bottom 0
 			left 0
 			right 0
-			background-color #111727
+			background-color #181818
 			display grid
 			grid-template-columns .2fr 1fr .2fr
 			will-change transform

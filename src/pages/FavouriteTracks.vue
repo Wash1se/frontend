@@ -1,7 +1,6 @@
 <template>
-  <h1>Main page</h1>
   <Message :type="type" :header="header" :hide_message="hide_message" @returned_show_value="hide_message = $event"/>
-  <div v-if="store.authenticated">
+  <div v-if="store.authenticated" style="width: 100%;">
     <div style="padding: 0px 20px; margin: 10px 0 10px 0;">
       <table class="naming">
               <td class="id-or-waves">
@@ -26,12 +25,7 @@
           </table>
     </div>
 
-    <VueTracklist :music="playerTracklistStore.allTracks.filter(song => song.is_liked === true)"/>
-    <!-- playerTracklistStore.favouriteMusic -->
-
-    <h1>{{playerTracklistStore.allTracks.filter(song => song.is_liked === true)}}</h1>
-
-    
+    <VueTracklist :music="playerTracklistStore.allTracks.filter(song => song.is_liked === true)"/>    
 
   </div>
 </template>
@@ -85,6 +79,9 @@ export default {
     width: 100%;
   }
 
+  .tracklist{
+    width: 100%;
+  }
 
   .naming tbody tr{
     color: darkgrey;

@@ -1,8 +1,11 @@
 <template>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="collapse navbar-collapse justify-content-md-center" id="navbarsExample08">
-      <ul class="navbar-nav">
-       <li class="nav-item active">
+  <div class="d-flex flex-column flex-shrink-0 p-3 text-white my-navbar">
+    <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
+      <span class="fs-4">My site</span>
+    </a>
+    <hr>
+    <ul class="nav nav-pills flex-column mb-auto">
+      <li class="nav-item active">
           <router-link to="/">
               Home
           </router-link>
@@ -32,9 +35,10 @@
           </li>
           <button v-on:click="logout">Logout</button>
         </div>
-      </ul>
-    </div>
-  </nav>
+    </ul>
+    <hr>
+  </div>
+
 </template>
 
 <script>
@@ -61,6 +65,12 @@ export default {
 </script>
 
 <style type="text/css">
+.my-navbar{
+  background-color: #070707;
+  width: 20rem;
+  height: 100%;
+}
+
 .nav-item {
   color:red;
   margin:5%;

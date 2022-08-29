@@ -1,7 +1,7 @@
 <template>
 	<div class="audioPlayerList">
 			<div style="padding:0px 20px;margin:10px 0 10px 0;">
-				<table class="item" v-for="(item,index) in music"
+				<table class="item" v-for="(item, index) in music"
 				:key="item.id"
 				@mouseover="highlighted = item.id"
 				@mouseleave="highlighted = null"
@@ -123,9 +123,11 @@ export default {
 				await this.emitter.emit('playPauseAudio', index)
 				this.emitter.emit('playPauseAudio', index)
 			}else{
+			this.playerTracklistStore.previousQueue = this.playerTracklistStore.currentQueue
 			this.playerTracklistStore.currentQueue = this.music
 			this.emitter.emit('playPauseAudio', index)
 			this.emitter.emit('clickTrackTemplate', index)
+			
 			
 			}
 			

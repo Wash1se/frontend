@@ -43,6 +43,7 @@ export default {
       .get(this.store.mainUrl+"audio/songs")
       .then(response => {
           this.playerTracklistStore.allTracks = response.data
+          if (!this.playerTracklistStore.previousQueue){this.playerTracklistStore.previousQueue = response.data}
         })
       .catch(error => {
           console.log(error)
